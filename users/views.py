@@ -1,71 +1,49 @@
 # Create your views here.
-from knox.auth import AuthToken
-from rest_framework import status
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.decorators import api_view
+
+import datetime
+
+import jwt
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from users.serializers import RegisterSerializer
 
+from .models import User
 
-@api_view(["POST"])
-def login_api(request):
-    serializer = AuthTokenSerializer(
-        data=request.data
-    )  # validate data from the request
-    serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data["user"]
-    _, token = AuthToken.objects.create(
-        user
-    )  # for getting the token created for user
 
-    return Response(
-        {
-            "user_info": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-            },
-            "token": token,
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data["email"]
+        password = request.data["password"]
+
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            raise AuthenticationFailed("user not found")
+
+        if not user.check_password(password):
+            raise AuthenticationFailed("Incorrect password")
+
+        payload = {
+            "id": user.id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            "iat": datetime.datetime.utcnow(),
         }
-    )
-
-
-@api_view(["GET"])
-def get_user_data(request):
-    user = request.user
-
-    if user.is_authenticated:
-        return Response(
-            {
-                "user_info": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                },
-            }
+        token = jwt.encode(payload, "secrect", algorithm="HS256").decode(
+            "utf-8"
         )
 
-    return Response(
-        {"error": "not authenticated"}, status=status.HTTP_401_UNAUTHORIZED
-    )
+        response = Response()
 
-
-@api_view(["POST"])
-def register_api(request):
-    serializer = RegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
-    user = serializer.save()
-    _, token = AuthToken.objects.create(user)
-
-    return Response(
-        {
-            "user_info": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-            },
-            "token": token,
-        }
-    )
+        response.set_cookies(key="jwt", value=token, httponly=True)
+        response.data = {"jwt": token}
+        return response
