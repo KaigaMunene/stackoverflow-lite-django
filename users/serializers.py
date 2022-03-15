@@ -32,8 +32,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         write_only=True,
         validators=[
             RegexValidator(
-                regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\W_]{6,}$",
-                message=" password must have a minimun of six characters",
+                regex=r"[A-Za-z0-9@#$%^&+=]{8,}",
+                message=" password must have a minimun of eight characters",
             )
         ],
     )
@@ -46,6 +46,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ("username", "password", "email", "first_name", "last_name")
 
     def create(self, validated_data):
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
 
         return user
