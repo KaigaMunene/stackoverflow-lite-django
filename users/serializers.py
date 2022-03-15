@@ -1,14 +1,20 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from rest_framework import serializers, validators
+
+User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
+        min_length=6,
+        max_length=12,
         validators=[
-            validators.UniqueValidator(
-                User.objects.all(), message="Username not available"
+            RegexValidator(
+                regex="^(?=.{6,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$",
+                message="username must be 6-20 characters long",
             ),
-        ]
+        ],
     )
 
     email = serializers.EmailField(
@@ -21,11 +27,19 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
 
     password = serializers.CharField(
-        min_length=8, max_length=32, validators=[]
+        min_length=8,
+        max_length=32,
+        write_only=True,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\W_]{6,}$",
+                message=" password must have a minimun of eight characters, at least one letter, one number and one special character",
+            )
+        ],
     )
 
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
+    first_name = serializers.CharField(max_length=20)
+    last_name = serializers.CharField(max_length=20)
 
     class Meta:
         model = User
