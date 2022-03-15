@@ -38,7 +38,6 @@ class UserManager(auth_models.BaseUserManager):
         user.is_staff = True
         user.is_superuser = True
         user.save()
-
         return user
 
 
