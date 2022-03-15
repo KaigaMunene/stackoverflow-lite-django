@@ -33,23 +33,10 @@ class UserManager(auth_models.BaseUserManager):
 
         return user
 
-    def create_superuser(
-        self,
-        username: str,
-        first_name: str,
-        last_name: str,
-        email: str,
-        password: str,
-    ) -> "User":
-        user = self.create_user(
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            password=password,
-            is_staff=True,
-            is_superuser=True,
-        )
+    def create_superuser(self, **kwargs) -> "User":
+        user = self.create_user(**kwargs)
+        user.is_staff = True
+        user.is_superuser = True
         user.save()
         return user
 
@@ -64,4 +51,4 @@ class User(auth_models.AbstractUser):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "username"]
