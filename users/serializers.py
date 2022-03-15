@@ -33,7 +33,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         validators=[
             RegexValidator(
                 regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\W_]{6,}$",
-                message=" password must have a minimun of eight characters, at least one letter, one number and one special character",
+                message=" password must have a minimun of six characters",
             )
         ],
     )
