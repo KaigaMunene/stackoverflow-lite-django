@@ -4,12 +4,12 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import RegisterSerializer
+from .serializers import UserSerializer
 
 
 class RegisterView(APIView):
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -20,5 +20,5 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
-        serializer = RegisterSerializer(user)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
