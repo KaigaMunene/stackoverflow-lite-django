@@ -1,13 +1,10 @@
 # Create your views here.
 
 from rest_framework import permissions
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.serializers import RegisterSerializer
-
-from .models import User
+from .serializers import RegisterSerializer
 
 
 class RegisterView(APIView):
