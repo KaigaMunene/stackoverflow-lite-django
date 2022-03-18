@@ -5,7 +5,7 @@ from rest_framework import serializers, validators
 User = get_user_model()
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         min_length=6,
         max_length=12,

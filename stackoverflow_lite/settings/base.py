@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # apps
     "apps.users",
     "apps.questions",
+    "apps.answers",
 ]
 
 AUTH_USER_MODEL = "users.User"

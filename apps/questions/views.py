@@ -1,5 +1,3 @@
-from multiprocessing import context
-
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -11,7 +9,9 @@ from .serializers import QuestionSerializer
 
 @api_view(["POST"])
 def post_question(request):
-    serializer = QuestionSerializer(data=request.data, context=request.user)
+    serializer = QuestionSerializer(
+        data=request.data, context={"request": request}
+    )
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -30,14 +30,16 @@ def question_view(request, id):
     question = get_object_or_404(Question, id=id)
     if request.method == "GET":
         serializer = QuestionSerializer(question)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == "PUT":
-        serializer = QuestionSerializer(instance=question, data=request.data)
+        serializer = QuestionSerializer(
+            instance=question, data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == "DELETE":
         question.delete()
         return Response({"message": "The question was deleted"})
