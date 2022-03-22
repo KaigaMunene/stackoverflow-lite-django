@@ -10,50 +10,56 @@ from .serializers import AnswerSerializer
 
 
 @api_view(["POST"])
-def post_answer(request, question):
-    question = get_object_or_404(Question, id=question)
-    if request.method == "POST":
-        serializer = AnswerSerializer(
-            data=request.data,
-            context={"request": request, "question": question},
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == "GET":
-        serializer = AnswerSerializer(question)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+def post_answer(request):
+    data = request.data
+    question = get_object_or_404(Question, id=data.get("question_id"))
+    serializer = AnswerSerializer(
+        data=data,
+        context={"request": request, "question": question},
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
 def get_all_answers(request):
+    answers = Answer.objects.all()
+    serializer = AnswerSerializer(answers, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_all_answers_for_question(request, question_id):
+    answers = Answer.objects.filter(question=question_id)
+    serializer = AnswerSerializer(answers, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET", "PUT", "DELETE"])
+def update_and_delete_an_answer(request, answer_id):
+    answer = get_object_or_404(Answer, id=answer_id)
     if request.method == "GET":
-        answers = Answer.objects.all()
-        serializer = AnswerSerializer(answers, many=True)
+        serializer = AnswerSerializer(answer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-@api_view(["PUT"])
-def update_an_answer(request, question):
-    question = get_object_or_404(Question, id=question)
-    if request.method == "PUT":
+    elif request.method == "PUT":
         serializer = AnswerSerializer(
-            data=request.data,
-            context={"request": request, "question": question},
+            instance=answer, data=request.data, context={"request": request}
         )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(["DELETE"])
-def delete_answer(request, id):
-    answer = get_object_or_404(Answer, id=id)
-    if request.method == "DELETE":
-        answer.delete()
+    elif request.method == "DELETE":
+        if answer.user == request.user:
+            answer.delete()
+            return Response(
+                {"message": "The question was deleted"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
         return Response(
-            {"message": "The question was deleted"},
-            status=status.HTTP_204_NO_CONTENT,
+            {"message": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
         )
