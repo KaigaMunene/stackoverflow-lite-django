@@ -41,4 +41,5 @@ class AnswerSerializer(serializers.ModelSerializer):
             raise err
         instance.answer = validated_data.get("answer", instance.answer)
 
+        instance.save()
         return instance
