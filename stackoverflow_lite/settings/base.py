@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # third party packages
     "rest_framework",
     "rest_framework_simplejwt",
+    "corsheaders",
     # apps
     "apps.users",
     "apps.questions",
@@ -53,6 +54,8 @@ AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -141,8 +144,17 @@ SIMPLE_JWT = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
