@@ -9,12 +9,6 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         min_length=6,
         max_length=12,
-        validators=[
-            RegexValidator(
-                regex="^(?=.{6,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$",
-                message="username must be 6-20 characters long",
-            ),
-        ],
     )
 
     email = serializers.EmailField(
@@ -30,12 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         max_length=32,
         write_only=True,
-        validators=[
-            RegexValidator(
-                regex=r"[A-Za-z0-9@#$%^&+=]{8,}",
-                message=" password must have a minimun of eight characters",
-            )
-        ],
     )
 
     first_name = serializers.CharField(max_length=20)
