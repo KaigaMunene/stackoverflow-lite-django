@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
 from rest_framework import serializers, validators
 
 User = get_user_model()
@@ -9,6 +8,12 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         min_length=6,
         max_length=12,
+        validators=[
+            validators.UniqueValidator(
+                User.objects.all(),
+                message="A user with that username already exists",
+            )
+        ],
     )
 
     email = serializers.EmailField(
