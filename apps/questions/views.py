@@ -28,6 +28,9 @@ def post_question(request):
 @api_view(["GET"])
 def get_all_questions(request):
     questions = Question.objects.all()
+    title = request.query_params.get("title")
+    if title:
+        questions = questions.filter(title=title)
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
